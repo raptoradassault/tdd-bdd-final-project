@@ -27,7 +27,7 @@ import os
 import logging
 import unittest
 from decimal import Decimal
-from service.models import Product, Category, db
+from service.models import Product, Category, db, DataValidationError
 from service import app
 from tests.factories import ProductFactory
 
@@ -65,6 +65,68 @@ class TestProductModel(unittest.TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()
+
+    def test_update_product_without_id(self):
+        """It should raise an error when updating without an ID"""
+        product = ProductFactory()
+        product.id = None
+
+        with self.assertRaises(DataValidationError):
+            product.update()
+
+    def test_deserialize_invalid_available(self):
+        """It should reject a non-boolean available value"""
+        product = Product()
+        data = ProductFactory().serialize()
+        data["available"] = "yes"
+
+        with self.assertRaises(DataValidationError):
+            product.deserialize(data)
+
+    def test_deserialize_invalid_category(self):
+        """It should reject an invalid category"""
+        product = Product()
+        data = ProductFactory().serialize()
+        data["category"] = "INVALID_CATEGORY"
+
+        with self.assertRaises(DataValidationError):
+            product.deserialize(data)
+
+    def test_deserialize_missing_name(self):
+        """It should reject data without a name"""
+        product = Product()
+        data = ProductFactory().serialize()
+        del data["name"]
+
+        with self.assertRaises(DataValidationError):
+            product.deserialize(data)
+
+    def test_deserialize_empty_data(self):
+        """It should reject empty product data"""
+        product = Product()
+
+        with self.assertRaises(DataValidationError):
+            product.deserialize(None)
+
+    def test_find_by_price(self):
+        """It should Find Products by Price"""
+        product = ProductFactory()
+        product.create()
+
+        products = Product.find_by_price(product.price).all()
+
+        self.assertGreaterEqual(len(products), 1)
+        self.assertEqual(products[0].price, product.price)
+
+    def test_find_by_price_string(self):
+        """It should Find Products by Price using a string"""
+        product = ProductFactory()
+        product.create()
+
+        products = Product.find_by_price(str(product.price)).all()
+
+        self.assertGreaterEqual(len(products), 1)
+        self.assertEqual(products[0].price, product.price)
 
     ######################################################################
     #  T E S T   C A S E S
