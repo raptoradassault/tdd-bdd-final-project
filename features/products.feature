@@ -1,3 +1,4 @@
+
 Feature: The product store service back-end
     As a Product Store Owner
     I need a RESTful catalog service
@@ -38,3 +39,69 @@ Scenario: Create a Product
     And I should see "True" in the "Available" dropdown
     And I should see "Tools" in the "Category" dropdown
     And I should see "34.95" in the "Price" field
+
+# 6a: Read a Product
+Scenario: Read a Product
+    When I visit the "Home Page"
+    And I set the "Name" to "Hat"
+    And I press the "Search" button
+    And I press the "Retrieve" button
+    Then I should see the message "Success"
+    And I should see "Hat" in the "Name" field
+    And I should see "A red fedora" in the "Description" field
+
+# 6b: Update a Product
+Scenario: Update a Product
+    When I visit the "Home Page"
+    And I set the "Name" to "Hat"
+    And I press the "Search" button
+    And I set the "Name" to "Updated Hat"
+    And I press the "Update" button
+    Then I should see the message "Success"
+
+# 6c: Delete a Product
+Scenario: Delete a Product
+    When I visit the "Home Page"
+    And I set the "Name" to "Hat"
+    And I press the "Search" button
+    And I press the "Delete" button
+    Then I should see the message "Product has been Deleted!"
+    When I set the "Name" to "Hat"
+    And I press the "Search" button
+    Then I should not see "Hat"
+
+# 6d: List All Products
+Scenario: List All Products
+    When I visit the "Home Page"
+    And I press the "Search" button
+    Then I should see "Hat"
+    And I should see "Shoes"
+    And I should see "Big Mac"
+    And I should see "Sheets"
+
+# 6e: Search Products by Category
+Scenario: Search Products by Category
+    When I visit the "Home Page"
+    And I select "Cloths" in the "Category" dropdown
+    And I press the "Search" button
+    Then I should see "Hat"
+    And I should see "Shoes"
+    And I should not see "Big Mac"
+
+# 6f: Search Products by Availability
+Scenario: Search Products by Availability
+    When I visit the "Home Page"
+    And I select "True" in the "Available" dropdown
+    And I press the "Search" button
+    Then I should see "Hat"
+    And I should see "Big Mac"
+    And I should see "Sheets"
+    And I should not see "Shoes"
+
+# 6g: Search Products by Name
+Scenario: Search Products by Name
+    When I visit the "Home Page"
+    And I set the "Name" to "Hat"
+    And I press the "Search" button
+    Then I should see "Hat"
+    And I should not see "Shoes"
